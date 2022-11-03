@@ -1,98 +1,132 @@
-import SideBar from './SideBar'
-import React, { Component, seEffect, useState} from 'react'
-import './studentsettings.css'
+import SideBar from "./SideBar";
+import React, { useState, useEffect } from "react";
+import "./studentsettings.css";
 
-class StudentSettings extends Component {
-  constructor(props) {
-      super(props)
+function StudentSettings() {
+  const user = localStorage.getItem("user");
+  const [studentuser, setStudentUser] = useState([]);
+  useEffect(() => {
+    fetch("https://enigmatic-woodland-61895.herokuapp.com/students")
+      .then((r) => r.json())
+      .then((response) => {
+        console.log(response);
+        // filter students by email
+        const student = response.filter((student) => student.email === user);
+        setStudentUser(student);
+      });
+  }, []);
 
-      this.state = {
-          Name: "",
-          email: "",
-          phone: "",
-          image: "",
-          password: ""
+  // get student id
+  const student_id = studentuser.map((student) => student.id);
+  console.log(student_id);
 
-      }
-      this.handleSubmit=this.handleSubmit.bind(this)
+  const [studentdetails, setStudentDetails] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    image: "",
+    password: "",
+  });
+
+  const handleChange = (e) =>
+    setStudentDetails({
+      ...studentdetails,
+      [e.target.name]: e.target.value,
+    });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const formData = {
+      name: studentdetails.name,
+      email: studentdetails.email,
+      phone: studentdetails.phone,
+      image: studentdetails.image,
+      password: studentdetails.password,
+    };
+    // console.log(formData)
+    fetch(`https://enigmatic-woodland-61895.herokuapp.com/student/${student_id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
   }
 
-  Namehandler = (event) => {
-      this.setState({
-          Name: event.target.value
-      })
-  }
-  emailhandler = (event) => {
-      this.setState({
-          email: event.target.value
-      })
-  }
-  phonehandler = (event) => {
-      this.setState({
-          phone: event.target.value
-      })
-  }
-  imagehandler = (event) => {
-      this.setState({
-          image: event.target.value
-      })
-  }
-  passwordhandler = (event) => {
-      this.setState({
-          password: event.target.value
-      })
-  }
+  return (
+    <div>
+      <div className="row">
+        <div className="col-md-2 main-sidebar">
+          <SideBar />
+        </div>
+        <div className="col-md-10">
+          <form onSubmit={handleSubmit} className="student-settings">
+            <h3 className="mt-4">Edit Profile</h3>
+            {studentuser.map((student) => {
+              return (
+                <div key={student.id}>
+                  <label className="form-label">Name :</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="student_name"
+                    value={student.name}
+                    onChange={handleChange}
+                    placeholder="Name..."
+                  />
+                  <br />
+                  <label className="form-label">Email :</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="email"
+                    value={student.email}
+                    onChange={handleChange}
+                    placeholder="Email..."
+                  />
+                  <br />
+                  <label className="form-label">Phone:</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    value={student.phone}
+                    onChange={handleChange}
+                    placeholder="Phone..."
+                  />
+                  <br />
+                  <label className="form-label">Image :</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="image"
+                    value={student.image}
+                    onChange={handleChange}
+                    placeholder="Image url..."
+                  />
+                  <br />
+                  <label className="form-label">Password :</label>
+                  <input
+                    className="form-control"
+                    type="password"
+                    name="password"
+                    onChange={handleChange}
+                    placeholder="change Password..."
+                  />
+                  <br />
 
-  // useEffect(() =>{
-  //   fetch("/sessions")
-  //   .then(r => r.json())
-  //   .then(response => setCohortSession(response))
-  // },[]);
-
-  // const today_date = new Date()
-  // console.log(today_date)
-  // const display = cohortSession.filter((cohort) => {
-  //   return cohort.date === parseInt(today_date)
-  // });
-
-  
-  handleSubmit = (event) => {
-      alert(`${this.state.name} ${this.state.email}  Update Successfull !!!!`)
-      console.log(this.state);
-      this.setState({
-          Name: "",
-          email: "",
-          phone: "",
-          image: "",
-          password: '',
-          
-      })
-   event.preventDefault()
-      
-  }
-  render() {
-      return (
-          <div>
-            <div className="row">
-              <div className="col-md-2 main-sidebar">
-                <SideBar />
-              </div>
-              <div className="col-md-10">
-              <form onSubmit={this.handleSubmit} className="student-settings">
-                  <h1>Edit Profile</h1>
-                  <label className='form-label'>Name :</label> <input className='form-control' type="text" value={this.state.Name} onChange={this.Namehandler} placeholder="Name..." /><br />
-                  <label className='form-label'>Email :</label> <input className='form-control' type="text" value={this.state.email} onChange={this.emailhandler} placeholder="Email..." /><br />
-                  <label className='form-label'>Phone:</label> <input className='form-control' type="text" value={this.state.phone} onChange={this.phonehandler} placeholder="Phone..." /><br />
-                  <label className='form-label'>Image :</label> <input className='form-control-file' type="file" value={this.state.image} onChange={this.imagehandler} placeholder="Image..." /><br />
-                  <label className='form-label'>Password :</label> <input className='form-control' type="password" value={this.state.password} onChange={this.passwordhandler} placeholder="Password..." /><br />
-                  
-                  <input type="submit" value="Submit" />
-              </form>
-              </div>
-              </div>
-          </div>
-      )
-  }
+                  <input
+                    className="btn btn-secondary btn-sm float-right"
+                    type="submit"
+                    value="Submit"
+                  />
+                </div>
+              );
+            })}
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default StudentSettings
+export default StudentSettings;

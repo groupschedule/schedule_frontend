@@ -1,17 +1,29 @@
-import React ,{useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import SideBar from "./SideBar";
-import {Link} from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 function TMSchedule() {
-  const [modules, setModules] = useState("")
+  const [modules, setModules] = useState([]);
   const [schedule, setSchedule] = useState({
-      session_name: '',
-      cohort_id: '',
-      technical_mentor_id: '',
-      date: '',
-      time: '',
-      link: ''
+    session_name: "",
+    cohort_id: "",
+    technical_mentor_id: "",
+    date: "",
+    time: "",
+    link: "",
+    announcement:""
   });
+
+  const [cohortSessions, setCohortSessions] = useState([]);
+  // fetch sessions data
+  useEffect(() => {
+    fetch("https://enigmatic-woodland-61895.herokuapp.com/sessions")
+      .then((r) => r.json())
+      .then((response) => {
+        // console.log(`cohort session`, response);
+        setCohortSessions(response);
+      });
+  }, []);
 
   function handleChange(event) {
     setSchedule({
@@ -29,27 +41,31 @@ function TMSchedule() {
       technical_mentor_id: 1,
       date: schedule.date,
       time: schedule.time,
-      link: schedule.link
+      link: schedule.link,
+      announcement: schedule.announcement
     };
 
-    // console.log(formData)
-    fetch("/sessions", {
+    console.log(formData)
+    fetch("https://enigmatic-woodland-61895.herokuapp.com/sessions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData ),
-    })
-    alert('sucess')
-      // .then((r) => r.json())
-      // .then((user) => onLogin(user));
+      body: JSON.stringify(formData),
+    });
+    setSchedule('')
+    alert("sucessfully added");
+    // .then((r) => r.json())
+    // .then((user) => onLogin(user));
   }
-
-  useEffect(() =>{
-    fetch("/cohorts")
-    .then(r => r.json())
-    .then(response => setModules(response))
-  },[])
+  // fetch cohorts data
+  useEffect(() => {
+    fetch("https://enigmatic-woodland-61895.herokuapp.com/cohorts")
+      .then((r) => r.json())
+      .then((response) => {
+        setModules(response);
+      });
+  }, []);
 
   return (
     <div>
@@ -62,7 +78,7 @@ function TMSchedule() {
 
           <form className="search-form">
             <input
-              class="form-control border border-secondary"
+              className="form-control border border-secondary"
               id="search-bar"
               type="text"
               placeholder="Search Sessions"
@@ -77,7 +93,7 @@ function TMSchedule() {
             {/* add a schedule model to add a new aschedule */}
             <button
               type="button"
-              class="btn btn-dark"
+              className="btn btn-dark"
               data-toggle="modal"
               data-target="#exampleModal"
               data-whatever="@mdo"
@@ -86,98 +102,113 @@ function TMSchedule() {
             </button>
 
             <div
-              class="modal fade"
+              className="modal fade"
               id="exampleModal"
-              tabindex="-1"
+              tabIndex="-1"
               role="dialog"
               aria-labelledby="exampleModalLabel"
               aria-hidden="true"
             >
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">
+              <div className="modal-dialog" role="document">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title" id="exampleModalLabel">
                       Add a Schedule
                     </h5>
                     <button
                       type="button"
-                      class="close"
+                      className="close"
                       data-dismiss="modal"
                       aria-label="Close"
                     >
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
-                  <div class="modal-body">
+                  <div className="modal-body">
                     <form onSubmit={handleSubmit}>
-                      <div class="form-group">
-                        <label for="recipient-name" class="col-form-label">
+                      <div className="form-group">
+                        <label className="col-form-label">
                           Session Name:
                         </label>
                         <input
                           type="text"
-                          name='session_name'
-                          class="form-control"
+                          name="session_name"
+                          className="form-control"
                           id="session-name"
                           value={schedule.session_name}
                           onChange={handleChange}
                         ></input>
                       </div>
-                      <div class="form-group">
-                        <label for="message-text" class="col-form-label">
+                      <div className="form-group">
+                        <label htmlFor="message-text" className="col-form-label">
                           Date:
                         </label>
                         <input
                           type="date"
-                          class="form-control"
-                          name='date'
+                          className="form-control"
+                          name="date"
                           id="date"
                           value={schedule.date}
                           onChange={handleChange}
                         ></input>
                       </div>
-                      <div class="form-group">
-                        <label for="message-text" class="col-form-label">
+                      <div className="form-group">
+                        <label htmlFor="message-text" className="col-form-label">
                           Time:
                         </label>
                         <input
                           type="time"
-                          class="form-control"
-                          name='time'
+                          className="form-control"
+                          name="time"
                           id="time"
                           value={schedule.time}
                           onChange={handleChange}
                         ></input>
                       </div>
-                      <div class="form-group">
-                        <label for="message-text" class="col-form-label">
+                      <div className="form-group">
+                        <label htmlFor="message-text" className="col-form-label">
                           Module:
                         </label>
-                        <select class="form-control"
-                          name='cohort_id'
+                        <select
+                          className="form-control"
+                          name="cohort_id"
                           value={schedule.cohort_id}
                           onChange={handleChange}
                         >
                           {Array.from(modules).map((cohort) => (
-                            <option key={cohort.id} value={cohort.id}>{cohort.name}</option>
+                            <option key={cohort.id} value={cohort.id}>
+                              {cohort.name}
+                            </option>
                           ))}
                         </select>
                       </div>
-                      <div class="form-group">
-                        <label for="message-text" class="col-form-label">
+                      <div className="form-group">
+                        <label htmlFor="message-text" className="col-form-label">
                           Link:
                         </label>
                         <input
                           type="text"
-                          class="form-control"
+                          className="form-control"
                           id="link"
-                          name='link'
+                          name="link"
                           value={schedule.link}
                           onChange={handleChange}
                         ></input>
                       </div>
-                      <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">
+                      <div className="form-group">
+                        <label htmlFor="message-text" className="col-form-label">
+                          Announcement:
+                        </label>
+                        <textarea
+                          className="form-control"
+                          type="text"
+                          name="announcement"
+                          value={schedule.announcement}
+                          onChange={handleChange}
+                        ></textarea>
+                      </div>
+                      <div className="modal-footer">
+                        <button type="submit" className="btn btn-primary">
                           Add
                         </button>
                       </div>
@@ -189,156 +220,87 @@ function TMSchedule() {
             {/* end of add schedule modal */}
           </div>
           {/* add an accordion */}
-          <div class="accordion" id="accordionExample">
+          <div className="accordion" id="accordion">
             {/* first accordion */}
-            <div class="card z-depth-0 bordered">
-              <div class="card-header" id="headingOne">
-                <h5 class="mb-0">
+            {cohortSessions.map((session, index) => (
+              <div className="card z-depth-0 bordered" key={index}>
+              <div className="card-header" id="headingOne">
+                <h5 className="mb-0">
                   <button
-                    class="btn btn-link"
+                    className="btn btn-link"
                     type="button"
                     data-toggle="collapse"
                     data-target="#collapseOne"
                     aria-expanded="true"
                     aria-controls="collapseOne"
                   >
-                    Friday 11th November 2022
+                    {session.date}
                   </button>
                 </h5>
               </div>
               <div
                 id="collapseOne"
-                class="collapse show"
+                className="collapse show"
                 aria-labelledby="headingOne"
                 data-parent="#accordionExample"
               >
-                <div class="card-body">
+                <div className="card-body">
                   {/* editable table */}
-                  <div class="card">
-                    <div class="card-body">
-                      <div id="table" class="table-editable">
-                        <span class="table-add float-right mb-3 mr-2">
-                          <a href="#!" class="text-success">
-                            <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
+                  <div className="card">
+                    <div className="card-body">
+                      <div id="table" className="table-editable">
+                        <span className="table-add float-right mb-3 mr-2">
+                          <a href="#!" className="text-success">
+                            <i className="fas fa-plus fa-2x" aria-hidden="true"></i>
                           </a>
                         </span>
-                        <table class="table table-bordered table-responsive-md table-striped text-center">
+                        <table className="table table-bordered table-responsive-md table-striped table-sm">
                           <thead>
                             <tr>
-                              <th class="text-center">Module</th>
-                              <th class="text-center">Time</th>
-                              <th class="text-center">Link</th>
+                              <th className="text-center">Session Name</th>
+                              <th className="text-center">Time</th>
+                              <th className="text-center">Link</th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td class="pt-3-half" contenteditable="true">
-                                Aurelia Vega
-                              </td>
-                              <td class="pt-3-half" contenteditable="true">
-                                30
-                              </td>
-                              <td class="pt-3-half" contenteditable="true">
-                                Deepends
-                              </td>
+                            {cohortSessions.map((today, index) => {
+                              if(today.date === (`${session.date}`)){
+                              return(
+                              <tr key={index}>
+                                <td className="pt-3-half">{today.session_name}</td>
+                                <td className="pt-3-half">{today.time}</td>
+                                <td className="pt-3-half">
+                                  <a href={`${today.link}`}>{today.link}</a>
+                                </td>
 
-                              <td>
-                                <span class="table-remove">
-                                  <button
-                                    type="button"
-                                    class="btn btn-dark btn-rounded btn-sm my-0"
-                                  >
-                                    <Link to={`/tm-session-details/1`} className='button-links'>View</Link>
-                                  </button>
-                                </span>
-                              </td>
-                            </tr>
+                                <td>
+                                  <span className="table-remove">
+                                    <button
+                                      type="button"
+                                      className="btn btn-dark btn-rounded btn-sm my-0"
+                                    >
+                                      <Link
+                                        to={`/tm-session-details/${today.id}`}
+                                        className="button-links"
+                                      >
+                                        View
+                                      </Link>
+                                    </button>
+                                  </span>
+                                </td>
+                              </tr>
+                            )}})}
                           </tbody>
                         </table>
                       </div>
                     </div>
                   </div>
-                  {/* editable table */}
                 </div>
               </div>
             </div>
-          </div>
-          {/* end of accordion */}
-
-          {/* add an accordion */}
-          <div class="accordion" id="accordionExample">
-            {/* first accordion */}
-            <div class="card z-depth-0 bordered">
-              <div class="card-header" id="headingOne">
-                <h5 class="mb-0">
-                  <button
-                    class="btn btn-link"
-                    type="button"
-                    data-toggle="collapse"
-                    data-target="#collapseOne"
-                    aria-expanded="true"
-                    aria-controls="collapseOne"
-                  >
-                    Friday 11th November 2022
-                  </button>
-                </h5>
-              </div>
-              <div
-                id="collapseOne"
-                class="collapse show"
-                aria-labelledby="headingOne"
-                data-parent="#accordionExample"
-              >
-                <div class="card-body">
-                  {/* editable table */}
-                  <div class="card">
-                    <div class="card-body">
-                      <div id="table" class="table-editable">
-                        <span class="table-add float-right mb-3 mr-2">
-                          <a href="#!" class="text-success">
-                            <i class="fas fa-plus fa-2x" aria-hidden="true"></i>
-                          </a>
-                        </span>
-                        <table class="table table-bordered table-responsive-md table-striped text-center">
-                          <thead>
-                            <tr>
-                              <th class="text-center">Module</th>
-                              <th class="text-center">Time</th>
-                              <th class="text-center">Link</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td class="pt-3-half" contenteditable="true">
-                                Aurelia Vega
-                              </td>
-                              <td class="pt-3-half" contenteditable="true">
-                                30
-                              </td>
-                              <td class="pt-3-half" contenteditable="true">
-                                Deepends
-                              </td>
-
-                              <td>
-                                <span class="table-remove">
-                                  <button
-                                    type="button"
-                                    class="btn btn-dark btn-rounded btn-sm my-0"
-                                  >
-                                    <Link to={`/tm-session-details/1`} className='button-links'>View</Link>
-                                  </button>
-                                </span>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                  {/* editable table */}
-                </div>
-              </div>
-            </div>
+            ))}
+            {/* end of first accordion */}
+            
           </div>
           {/* end of accordion */}
         </div>

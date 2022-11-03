@@ -1,7 +1,69 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import SideBar from './SideBar'
+import { useParams } from 'react-router-dom';
 
 function TMSessionDetails() {
+
+  const [tmSession, setTmSession] = useState([])
+
+  let {session_id} =  useParams()
+  useEffect(() =>{
+    fetch(`https://enigmatic-woodland-61895.herokuapp.com/sessions/${session_id}`)
+    .then(r => r.json())
+    .then(response => setTmSession(response))
+  },[]);
+
+  const [schedule, setSchedule] = useState({
+      session_name: '',
+      cohort_id: '',
+      technical_mentor_id: '',
+      date: '',
+      time: '',
+      link: ''
+  });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const formData = {
+      session_name: schedule.session_name,
+      cohort_id: schedule.cohort_id,
+      technical_mentor_id: 1,
+      date: schedule.date,
+      time: schedule.time,
+      link: schedule.link
+    };
+  }
+
+  function handleChange(event) {
+    setSchedule({
+      ...schedule,
+      [event.target.name]: event.target.value,
+    });
+  }
+
+  // adding a comment
+  const [comment, setComment] = useState("")
+
+  function handleCommentSubmit(e) {
+    e.preventDefault();
+    const commentData = {
+      student_id : 1,
+      session_id : 2,
+      description: comment
+    };
+    fetch("https://enigmatic-woodland-61895.herokuapp.com/comments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(commentData),
+    })
+    setComment('');
+  }
+
+
+
   return (
     <div>
       <div className='row'>
@@ -10,30 +72,50 @@ function TMSessionDetails() {
           <div className='row mt-5'>
               <div className='col-6 border-right'>
                 <div className="summary-header mt-4">
-                  <span className='summary-title'>Module Name</span>
+                  <span className='summary-title'>{tmSession.session_name}</span>
                 </div>
                 <div className="summary-header mt-2 container">
                 <form className=''>
                   <div className='entry-data'>
-                      <div class="mb-3 mt-1">
+                      <div className="mb-3 mt-1">
                           <label className="form-label">Session Name</label>
-                          <input type="text" className="form-control" />
+                          <input type="text"
+                            className="form-control"
+                            name='session-name'
+                            value={tmSession.session_name}
+                            onChange={handleChange}
+                             />
                       </div>
-                      <div class="mb-3 mt-3">
+                      <div className="mb-3 mt-3">
                           <label className="form-label">Date</label>
-                          <input type="date" className="form-control" />
+                          <input type="date" 
+                            className="form-control"
+                            name='session-date'
+                            value={tmSession.date}
+                            onChange={handleChange}
+                             />
                       </div>
-                      <div class="mb-3 mt-3">
+                      <div className="mb-3 mt-3">
                           <label className="form-label">Time</label>
-                          <input type="time" className="form-control" />
+                          <input type="time" 
+                            className="form-control" 
+                            name='session-time'
+                            value={tmSession.time}
+                            onChange={handleChange}
+                          />
                       </div>
-                      <div class="mb-3 mt-3">
+                      <div className="mb-3 mt-3">
                           <label className="form-label">Link</label>
-                          <input type="text" className="form-control" />
+                          <input type="text" 
+                            className="form-control" 
+                            name='session-link'
+                            value={tmSession.link}
+                            onChange={handleChange}
+                          />
                       </div>
-                      <div class="mb-3 mt-3 form-check">
+                      <div className="mb-3 mt-3 form-check">
                         <input type="checkbox" class="form-check-input"/>
-                        <label class="form-check-label">Resend Invite</label>
+                        <label className="form-check-label">Resend Invite</label>
                       </div>
                       <div class="mb-3">
                           <button type="Submit" className="form-control btn-success">Edit</button>
@@ -49,35 +131,26 @@ function TMSessionDetails() {
                     <div className='chats mt-1 border-bottom'>
                       <span className='student-name'>TM</span>
                       <div className='text-secondary'>
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
+                      {tmSession.announcement}
                       </div>
                     </div>
-                    <div className='chats mt-1'>
-                      <span className='student-name'>Student 1</span>
+                    {tmSession.comments && tmSession.comments.map((comment, index) =>(
+                    <div className='chats' key={index}>
+                      <span className='student-name'>{comment.student_id}</span>
                       <div>
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
+                        {comment.description}
                       </div>
                     </div>
-                    <div className='chats mt-1'>
-                      <span className='student-name'>Student 5</span>
-                      <div>
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
-                      </div>
-                    </div>
-                    <div className='chats mt-1'>
-                      <span className='student-name'>Student 9</span>
-                      <div>
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
-                        Ipsum dolor sit amet, consectetur adipiscing, sed eiusmod tempor incidunt
-                      </div>
-                    </div>
+                    ))}   
                     
                   </div>
-                  <form className='adding-comment mt-2'>
-                  <input className='h-100 px-4 student-comment-text' type='text' placeholder='Add comment.......' />
+                  <form className='adding-comment mt-2' onSubmit={handleCommentSubmit}>
+                  <input className='h-100 px-4 student-comment-text'
+                     type='text'
+                     name='comment'
+                     value={comment}
+                     onChange={(e) => setComment(e.target.value)}
+                     placeholder='Add comment.......' />
                   <button type='submit' className='btn btn-secondary btn-sm mt-2 float-right'>Submit</button>
                   </form>
                 </div>
